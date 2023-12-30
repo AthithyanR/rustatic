@@ -11,3 +11,4 @@ axum = "0.7.3"
 mime_guess = "2.0.4"
 tokio = { version = "1.35.1", features = ["macros", "rt-multi-thread", "fs"] }
 tower-http = { version = "0.5.0", features = ["fs"] }
+urlencoding = "2.1.3"

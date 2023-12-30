@@ -5,19 +5,25 @@ use axum::{
     serve, Router, body::Body,
 };
 use tower_http::services::ServeFile;
-use std::{env, fs};
+use urlencoding::decode;
+use std::{env, fs, net::{SocketAddr, Ipv4Addr}};
 use tokio::net;
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    let addr = SocketAddr::new(Ipv4Addr::new(0, 0, 0, 0).into(), 0);
+    let listener = net::TcpListener::bind(&addr).await?;
+
     let app = Router::new().fallback(handler);
-    let listener = net::TcpListener::bind("0.0.0.0:3000").await?;
+    println!("Rustatic starting at http://{}", listener.local_addr().unwrap());
     serve(listener, app).await?;
     Ok(())
 }
 
 async fn handler(uri: Uri, headers: HeaderMap) -> Response {
-    let req_path = &uri.to_string()[1..]; // removing the / from beginning to make it a non-absolute path
+    let uri = uri.to_string();
+    let decoded_uri = decode(&uri).unwrap();
+    let req_path = &decoded_uri.to_string()[1..]; // removing the / from beginning to make it a non-absolute path
 
     let mut target_path = env::current_dir().expect("Cannot get the current directory!");
     target_path.push(req_path);
